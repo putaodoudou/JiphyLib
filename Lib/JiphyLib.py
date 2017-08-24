@@ -34,9 +34,26 @@ class Jiphy(object):
 				break
 		print "projectID: " + projectID
 		return projectID
-
+		
+	## Get Version ID (versionID)
+	def Get_VersionID(self, projectID, versionName):
+		''' Gets the versionID of a test cycle in JIRA
+			params: cycleName (string)
+			usage: Get_VersionID("This Cycle Name")
+		'''
+		endpoint="/util/versionBoard-list?projectId="+projectID
+		response = requests.Session()
+		response.trust_env = False
+		response = requests.get(self.url+endpoint, auth=(self.user,self.passwd))
+		results = json.loads(response.text)
+		for releaseStatus in results:
+			for version in range (0,len(results[releaseStatus])):
+				if results[releaseStatus][version]['label'] == versionName:
+					versionID = results[releaseStatus][version]['value']
+		return versionID
+		
 	## Get Test Cycle ID (cycleID)
-	def Get_Test_CycleID(self, projectID, cycleName):
+	def Get_Test_CycleID(self, projectID, cycleName, versionID):
 		''' Gets the test cycleID of a test cycle in JIRA
 			params: projectID(int), cycleName(string)
 			usage: Get_Test_CycleID(123, "This Test Cycle Name")
@@ -70,7 +87,7 @@ class Jiphy(object):
 				"startDate": today,
 				"endDate": today,
 				"projectId": projectID,
-				"versionId": "-1"
+				"versionId": versionID
 			}
 			response = requests.Session()
 			response.trust_env = False
